@@ -1,0 +1,50 @@
+version: '3.1'
+
+services: 
+  backend:
+    build:
+      context: ./backend
+      args: 
+        UserId: 1000
+        Username: www
+    volumes: 
+      - ./backend/config/php.ini:/usr/local/etc/php/php.ini
+      - ./backend/src:/var/www
+    networks:
+      - prhol-network
+
+  nginx:
+    image: nginx
+    volumes: 
+      - ./nginx/config/default.conf:/etc/nginx/conf.d/default.conf
+      - ./backend/src:/var/www
+    networks: 
+      - prhol-network
+    ports:
+      - "80:80"
+    restart: unless-stopped
+  
+  db:
+    image: mariadb
+    volumes: 
+      - ./db/data:/var/lib/mysql
+    environment: 
+      MYSQL_USER: prholUser
+      MYSQL_PASSWORD: prholPass
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_DATABASE: prholDb
+    networks: 
+      - prhol-network
+    restart: unless-stopped
+  
+  adminer:
+    image: adminer
+    networks:
+      - prhol-network
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+
+networks: 
+  prhol-network:
+    driver: bridge
